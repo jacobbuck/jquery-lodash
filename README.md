@@ -1,9 +1,9 @@
-jQuery-Underscore
+jQuery-Lodash
 =================
 
-Underscore and Lodash adaptor for jQuery
- 
-Replaces some of jQuery’s internal utility methods with Underscore, and introduces some of Underscore’s collection methods to jQuery.
+Lodash adaptor for jQuery
+
+Replaces some of jQuery’s internal utility methods with Lodash, and introduces some of Lodash's collection methods to jQuery.
 
 License
 -------

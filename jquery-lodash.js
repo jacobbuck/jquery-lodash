@@ -1,33 +1,37 @@
 (function (factory) {
 	if (typeof define === 'function' && define.amd) {
 		// AMD. Register as an anonymous module
-		define(['jquery', 'underscore'], factory);
+		define(['jquery', 'lodash'], factory);
 	} else {
 		// Browser globals
 		factory(jQuery, _);
 	}
 }(function ($, _) {
 
+	function shimIteratee (callback) {
+		return function (value, key, list) {
+			return callback.apply(value, key, value, list);
+		}
+	}
+
 	// Core Utilities
 
-	$.each = _.each;
-	$.inArray = _.lastIndexOf;
-	$.map = _.map;
+	$.each = function (collection, callback) {
+		return _.each(collection, shimIteratee(callback));
+	};
+
+	$.map = function (collection, callback) {
+		return _.map(collection, shimIteratee(callback));
+	};
+
+	$.inArray = _.indexOf;
 	$.merge = _.zip;
 
 	// Grep is a combination of filter and reject, depending on last argument
 
 	$.grep = function (elems, callback, invert) {
-		return (invert ? _.reject : _.filter)(elems, callback);
+		return (invert ? _.reject : _.filter)(elems, shimIteratee(callback));
 	};
-
-	// Deep extend using Lo-dash's _.merge, otherwise use jQuery's $.extend
-
-	var deepExtend = _.merge || function (extend) {
-		return function () {
-			return extend.apply(this, _.zip([true], arguments));
-		};
-	}($.extend);
 
 	// Extend/Merge
 
@@ -46,7 +50,7 @@
 
 		// Deep extend
 		if (true === deep) {
-			return deepExtend.apply(this, args);
+			return _.merge.apply(this, args);
 		}
 
 		// Shallow extend
@@ -59,7 +63,14 @@
 		'max min sortBy shuffle sample first initial last rest without'.split(' '),
 		function (method) {
 			$.fn[method] = function () {
-				var result = _[method].apply(this, _.zip([this], arguments));
+				var args = _.zip([this], arguments);
+				args = _.map(args, function (val) {
+					if (_.isFunction(val)) {
+						return shimIteratee(val);
+					}
+					return val;
+				});
+				var result = _[method].apply(this, args);
 				// Sometimes the result can be a single element, so wrap in array
 				return this.pushStack(_.isArray(result) ? result : [result]);
 			};
