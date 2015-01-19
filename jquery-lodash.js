@@ -10,7 +10,7 @@
 
 	function shimIteratee (callback) {
 		return function (value, key, list) {
-			return callback.apply(value, key, value, list);
+			return callback.call(value, key, value, list);
 		}
 	}
 
